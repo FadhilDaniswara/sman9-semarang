@@ -1,0 +1,20 @@
+// Edit daftar ekskul di sini. Tambah entri baru dengan id unik.
+export const ekskul = [
+  { id: "ekskul-01", nama: "Basket", kategori: "Olahraga", deskripsi: "Latihan teknik dasar bola basket, kerja sama tim, dan sportivitas, mulai dari dribel dan passing hingga permainan.", jadwal: "Setiap Hari Rabu" },
+  { id: "ekskul-02", nama: "Futsal", kategori: "Olahraga", deskripsi: "Latihan keterampilan futsal, strategi permainan, dan kekompakan tim untuk menjaga kebugaran dan semangat bersaing.", jadwal: "Setiap Hari Kamis" },
+  { id: "ekskul-03", nama: "Voli", kategori: "Olahraga", deskripsi: "Latihan servis, passing, dan smash, serta kekompakan tim dalam permainan bola voli.", jadwal: "Setiap Hari Senin" },
+  { id: "ekskul-04", nama: "Dance", kategori: "Seni", deskripsi: "Latihan gerak, irama, dan koreografi untuk melatih ekspresi, kreativitas, dan rasa percaya diri.", jadwal: "Setiap Hari Selasa" },
+  { id: "ekskul-05", nama: "Pramuka", kategori: "Kepanduan", deskripsi: "Kegiatan kepanduan yang melatih kemandirian, kedisiplinan, kerja sama, dan keterampilan di alam terbuka.", jadwal: "Setiap Hari Jumat" },
+  { id: "ekskul-06", nama: "PMR", kategori: "Sosial", deskripsi: "Kegiatan kepalangmerahan yang melatih pertolongan pertama, kepedulian sosial, dan kesiapsiagaan.", jadwal: "Setiap Hari Kamis" },
+  { id: "ekskul-07", nama: "Bismapala (Pecinta Alam)", kategori: "Kepanduan", deskripsi: "Kegiatan pecinta alam yang melatih kepedulian lingkungan, keterampilan di alam terbuka, dan kerja sama tim.", jadwal: "Setiap Hari Kamis" },
+  { id: "ekskul-08", nama: "Paskibra", kategori: "Kepanduan", deskripsi: "Latihan baris-berbaris dan pengibaran bendera yang melatih kedisiplinan, kekompakan, dan rasa tanggung jawab.", jadwal: "Setiap Hari Senin" },
+  { id: "ekskul-09", nama: "Paduan Suara", kategori: "Seni", deskripsi: "Latihan olah vokal dan harmonisasi suara bersama untuk melatih kekompakan dan kepekaan bermusik.", jadwal: "Setiap Hari Rabu" },
+  { id: "ekskul-10", nama: "Bahasa Inggris", kategori: "Bahasa", deskripsi: "Latihan berbicara, mendengar, dan menulis dalam bahasa Inggris untuk meningkatkan kepercayaan diri berbahasa.", jadwal: "Setiap Hari Kamis" },
+  { id: "ekskul-11", nama: "Bulu Tangkis", kategori: "Olahraga", deskripsi: "Latihan teknik pukulan, kelincahan, dan strategi permainan bulu tangkis.", jadwal: "Setiap Hari Jumat" },
+  { id: "ekskul-12", nama: "Bahasa Jepang", kategori: "Bahasa", deskripsi: "Pengenalan dan latihan dasar bahasa Jepang, termasuk huruf, kosakata, dan percakapan sederhana.", jadwal: "Setiap Hari Kamis" },
+  { id: "ekskul-13", nama: "Tari Tradisional", kategori: "Seni", deskripsi: "Latihan gerak dan karakter tari tradisional untuk mengenal dan melestarikan budaya daerah.", jadwal: "Setiap Hari Kamis" },
+  { id: "ekskul-14", nama: "Tari Saman", kategori: "Seni", deskripsi: "Latihan tari Saman yang menuntut kekompakan gerak, irama, dan kerja sama dalam kelompok.", jadwal: "Setiap Hari Senin" },
+  { id: "ekskul-15", nama: "Atletik", kategori: "Olahraga", deskripsi: "Latihan lari, lompat, dan lempar untuk melatih kekuatan, kecepatan, dan daya tahan.", jadwal: "Setiap Hari Rabu" },
+  { id: "ekskul-16", nama: "Band", kategori: "Seni", deskripsi: "Latihan bermusik bersama dengan berbagai alat musik untuk mengasah kreativitas dan kekompakan.", jadwal: "Setiap Hari Rabu" },
+  { id: "ekskul-17", nama: "Rohis", kategori: "Keagamaan", deskripsi: "Kegiatan keagamaan Islam yang mengisi pembinaan akhlak, kajian, dan kebersamaan antarsiswa.", jadwal: "Setiap Hari Rabu" },
+];

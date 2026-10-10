@@ -1,0 +1,8 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html { scroll-behavior: smooth; }
+body { background: #F5F0E4; color: #171A16; }
+:focus-visible { outline: 3px solid #D7EF52; outline-offset: 2px; box-shadow: 0 0 0 5px #123D2B; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; scroll-behavior: auto !important; } }
