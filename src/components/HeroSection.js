@@ -1,8 +1,10 @@
+"use client";
 import Link from "next/link";
 import PhotoSlot from "./PhotoSlot";
-import { sekolah } from "@/data/sekolah";
+import { useStore } from "@/lib/store";
 
 export default function HeroSection() {
+  const { data: sekolah } = useStore("sekolah");
   return (
     <section className="overflow-hidden bg-forest text-ivory">
       <div className="mx-auto grid max-w-6xl items-center gap-12 px-4 pb-20 pt-14 md:grid-cols-12 md:pt-20">

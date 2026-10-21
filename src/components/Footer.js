@@ -1,8 +1,14 @@
+"use client";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import Logo from "./Logo";
-import { sekolah, PLACEHOLDER } from "@/data/sekolah";
+import { useStore } from "@/lib/store";
+import { PLACEHOLDER } from "@/data/sekolah";
 
 export default function Footer() {
+  const path = usePathname();
+  const { data: sekolah } = useStore("sekolah");
+  if (path.startsWith("/admin")) return null;
   return (
     <footer className="mt-20 bg-forest text-ivory">
       <div className="mx-auto grid max-w-6xl gap-8 px-4 py-10 md:grid-cols-3">
@@ -22,7 +28,10 @@ export default function Footer() {
           {sekolah.kontak && <p>{sekolah.kontak}</p>}
         </div>
       </div>
-      <p className="border-t border-ivory/20 py-4 text-center text-xs">© 2026 {sekolah.nama}</p>
+      <p className="border-t border-ivory/20 py-4 text-center text-xs">
+        © 2026 {sekolah.nama}
+        <Link href="/admin/login" className="ml-4 opacity-60 hover:opacity-100">Admin</Link>
+      </p>
     </footer>
   );
 }

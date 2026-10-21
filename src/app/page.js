@@ -1,11 +1,15 @@
+"use client";
 import Link from "next/link";
 import HeroSection from "@/components/HeroSection";
 import SectionHeading from "@/components/SectionHeading";
 import NewsCard from "@/components/NewsCard";
-import { berita } from "@/data/berita";
-import { sekolah, PLACEHOLDER } from "@/data/sekolah";
+import { useStore } from "@/lib/store";
+import { PLACEHOLDER } from "@/data/sekolah";
 
 export default function Home() {
+  const { data: berita } = useStore("berita");
+  const { data: sekolah } = useStore("sekolah");
+  const sambutan = [].concat(sekolah.sambutan.teks ?? []);
   return (
     <>
       <HeroSection />
@@ -21,9 +25,9 @@ export default function Home() {
         <div className="border-l-8 border-lime bg-forest p-8 text-ivory">
           <SectionHeading kicker="salam hangat" title={sekolah.sambutan.judul} dark />
           <div className="space-y-4 leading-relaxed">
-            {sekolah.sambutan.teks.map((t, i) => <p key={i}>{t}</p>)}
+            {sambutan.map((t, i) => <p key={i}>{t}</p>)}
           </div>
-          <p className="mt-6">{sekolah.sambutan.penutup}</p>
+          {sekolah.sambutan.penutup && <p className="mt-6">{sekolah.sambutan.penutup}</p>}
           <p className="text-sm">{sekolah.sambutan.jabatan}</p>
           <p className="mt-2 font-hand text-2xl text-lime">{sekolah.sambutan.penulis}</p>
         </div>
@@ -42,7 +46,7 @@ export default function Home() {
           <SectionHeading kicker="mampir yuk" title="Informasi Kunjungan" />
           <p>{sekolah.alamat ?? `[Alamat belum diverifikasi] ${PLACEHOLDER}`}</p>
           {sekolah.mapsUrl
-            ? <a href={sekolah.mapsUrl} className="mt-4 inline-block bg-forest px-4 py-2 font-bold text-ivory" target="_blank" rel="noopener noreferrer">Buka di Google Maps</a>
+            ? <a href={sekolah.mapsUrl} className="mt-4 inline-block rounded-md bg-forest px-4 py-2 font-bold text-ivory" target="_blank" rel="noopener noreferrer">Buka di Google Maps</a>
             : <p className="mt-2 text-sm italic">[Tautan Google Maps resmi belum tersedia]</p>}
         </div>
       </section>

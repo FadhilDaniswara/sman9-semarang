@@ -9,6 +9,7 @@ const links = [{ href: "/", label: "Home" }, { href: "/about", label: "About" },
 export default function Navbar() {
   const path = usePathname();
   const [open, setOpen] = useState(false);
+  if (path.startsWith("/admin")) return null;
   const active = (h) => (h === "/" ? path === "/" : path.startsWith(h));
   const item = (l) => (
     <Link key={l.href} href={l.href} onClick={() => setOpen(false)} aria-current={active(l.href) ? "page" : undefined}
