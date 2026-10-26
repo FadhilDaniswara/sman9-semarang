@@ -19,14 +19,19 @@ export default function AdminShell({ children }) {
 
   useEffect(() => {
     if (halamanLogin) return;
-    if (sudahLogin()) setOk(true);
-    else router.replace("/admin/login");
+    let hidup = true;
+    sudahLogin().then((ok) => {
+      if (!hidup) return;
+      if (ok) setOk(true);
+      else router.replace("/admin/login");
+    });
+    return () => { hidup = false; };
   }, [halamanLogin, path, router]);
 
   if (halamanLogin) return <div className="min-h-screen bg-forest">{children}</div>;
   if (!ok) return <p className="p-8">Memeriksa sesi…</p>;
 
-  const keluar = () => { logout(); setOk(false); router.replace("/admin/login"); };
+  const keluar = async () => { await logout(); setOk(false); router.replace("/admin/login"); };
 
   return (
     <div className="min-h-screen bg-ivory md:flex">

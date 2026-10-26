@@ -12,20 +12,19 @@ export default function AdminEkskul() {
 
   const ubah = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
-  const submit = (e) => {
+  const submit = async (e) => {
     e.preventDefault();
     const item = {
       id: form.baru ? `ekskul-${Date.now()}` : form.id,
       nama: form.nama.trim(), kategori: form.kategori.trim() || "Umum",
       deskripsi: form.deskripsi.trim(), jadwal: form.jadwal.trim() || "Jadwal akan diperbarui",
     };
-    simpan(form.baru ? [...data, item] : data.map((x) => (x.id === item.id ? item : x)));
-    setForm(null);
-    setPesan("Ekskul tersimpan.");
+    const ok = await simpan(form.baru ? [...data, item] : data.map((x) => (x.id === item.id ? item : x)));
+    if (ok) { setForm(null); setPesan("Ekskul tersimpan di database."); }
   };
 
-  const hapus = (x) => {
-    if (confirm(`Hapus ekskul "${x.nama}"?`)) { simpan(data.filter((d) => d.id !== x.id)); setPesan("Ekskul dihapus."); }
+  const hapus = async (x) => {
+    if (confirm(`Hapus ekskul "${x.nama}"?`) && (await simpan(data.filter((d) => d.id !== x.id)))) setPesan("Ekskul dihapus.");
   };
 
   if (form) {

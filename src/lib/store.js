@@ -1,16 +1,14 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase";
 import { berita as beritaAwal } from "@/data/berita";
 import { ekskul as ekskulAwal } from "@/data/ekskul";
 import { sekolah as sekolahAwal } from "@/data/sekolah";
 
-// Login admin (demo tugas kuliah). Catatan: tersimpan di kode, BUKAN keamanan sungguhan.
-export const ADMIN_USER = "adminjosjis";
-export const ADMIN_PASS = "josjisjus";
-const AUTH_KEY = "sman9_admin";
-const KEYS = { berita: "sman9_berita", ekskul: "sman9_ekskul", sekolah: "sman9_sekolah" };
+// Data diambil dari Supabase. Jika koneksi gagal / tabel kosong, dipakai data awal dari src/data/*.js
 const AWAL = { berita: beritaAwal, ekskul: ekskulAwal, sekolah: sekolahAwal };
 const EVENT = "sman9-update";
+const DOMAIN = process.env.NEXT_PUBLIC_ADMIN_EMAIL_DOMAIN || "sman9.test";
 
 function normalisasi(nama, d) {
   if (nama === "sekolah") {
@@ -21,57 +19,118 @@ function normalisasi(nama, d) {
       sambutan: { ...AWAL.sekolah.sambutan, ...d.sambutan },
     };
   }
-  return Array.isArray(d) ? d : AWAL[nama];
+  return Array.isArray(d) && d.length > 0 ? d : AWAL[nama];
 }
 
-function baca(nama) {
+async function muat(nama) {
+  if (!supabase) return null;
   try {
-    const r = window.localStorage.getItem(KEYS[nama]);
-    return r ? JSON.parse(r) : null;
+    if (nama === "sekolah") {
+      const { data, error } = await supabase.from("sekolah").select("data").eq("id", 1).maybeSingle();
+      return error || !data ? null : data.data;
+    }
+    const { data, error } = await supabase.from(nama).select("*").order("urutan", { ascending: true });
+    if (error || !data || data.length === 0) return null;
+    if (nama === "berita") {
+      return data.map((r) => ({
+        id: r.id, category: r.category, title: r.title, date: r.date, excerpt: r.excerpt,
+        image: r.image || null, sumber: r.sumber || undefined, content: Array.isArray(r.content) ? r.content : [],
+      }));
+    }
+    return data.map((r) => ({ id: r.id, nama: r.nama, kategori: r.kategori, deskripsi: r.deskripsi, jadwal: r.jadwal }));
   } catch {
     return null;
   }
 }
 
-// Hook data: "berita" | "ekskul" | "sekolah". Awalnya data bawaan, lalu diganti isi localStorage bila ada.
+// Menghindari permintaan ganda: beberapa komponen meminta data yang sama dalam satu halaman.
+const memo = {};
+function ambil(nama, paksa = false) {
+  const m = memo[nama];
+  if (!paksa && m && Date.now() - m.t < 3000) return m.p;
+  const p = muat(nama);
+  memo[nama] = { t: Date.now(), p };
+  return p;
+}
+
+async function tulis(nama, d) {
+  if (!supabase) throw new Error("Supabase belum dikonfigurasi (cek environment variable).");
+  if (nama === "sekolah") {
+    const { error } = await supabase.from("sekolah").upsert({ id: 1, data: d });
+    if (error) throw error;
+    return;
+  }
+  const baris = d.map((x, i) =>
+    nama === "berita"
+      ? { id: x.id, urutan: i, category: x.category ?? "", title: x.title, date: x.date ?? "", excerpt: x.excerpt ?? "", image: x.image || "", sumber: x.sumber || "", content: x.content ?? [] }
+      : { id: x.id, urutan: i, nama: x.nama, kategori: x.kategori ?? "", deskripsi: x.deskripsi ?? "", jadwal: x.jadwal ?? "" }
+  );
+  if (baris.length) {
+    const { error } = await supabase.from(nama).upsert(baris);
+    if (error) throw error;
+  }
+  const ids = d.map((x) => x.id);
+  const hapus = supabase.from(nama).delete();
+  const { error: e2 } = ids.length
+    ? await hapus.not("id", "in", `(${ids.map((i) => `"${i}"`).join(",")})`)
+    : await hapus.neq("id", "");
+  if (e2) throw e2;
+}
+
+// Hook data: "berita" | "ekskul" | "sekolah"
 export function useStore(nama) {
   const [data, setData] = useState(AWAL[nama]);
   const [siap, setSiap] = useState(false);
 
   useEffect(() => {
-    const muat = () => { setData(normalisasi(nama, baca(nama))); setSiap(true); };
-    muat();
-    window.addEventListener(EVENT, muat);
-    window.addEventListener("storage", muat);
-    return () => { window.removeEventListener(EVENT, muat); window.removeEventListener("storage", muat); };
+    let hidup = true;
+    const segarkan = () => ambil(nama).then((d) => { if (hidup) { setData(normalisasi(nama, d)); setSiap(true); } });
+    segarkan();
+    window.addEventListener(EVENT, segarkan);
+    return () => { hidup = false; window.removeEventListener(EVENT, segarkan); };
   }, [nama]);
 
-  const simpan = useCallback((d) => {
-    try { window.localStorage.setItem(KEYS[nama], JSON.stringify(d)); }
-    catch { alert("Gagal menyimpan: penyimpanan browser penuh atau dinonaktifkan."); return; }
-    window.dispatchEvent(new Event(EVENT));
+  // Mengembalikan true jika berhasil disimpan ke database.
+  const simpan = useCallback(async (d) => {
+    setData(normalisasi(nama, d));
+    try {
+      await tulis(nama, d);
+      await ambil(nama, true);
+      window.dispatchEvent(new Event(EVENT));
+      return true;
+    } catch (e) {
+      alert("Gagal menyimpan ke database: " + (e?.message || e));
+      ambil(nama, true).then(() => window.dispatchEvent(new Event(EVENT)));
+      return false;
+    }
   }, [nama]);
 
-  const reset = useCallback(() => {
-    try { window.localStorage.removeItem(KEYS[nama]); } catch {}
-    window.dispatchEvent(new Event(EVENT));
-  }, [nama]);
+  // Mengembalikan isi database ke data awal dari file src/data/*.js
+  const reset = useCallback(() => simpan(AWAL[nama]), [simpan, nama]);
 
   return { data, simpan, reset, siap };
 }
 
-export function cekLogin(user, pass) {
-  if (user === ADMIN_USER && pass === ADMIN_PASS) {
-    try { window.localStorage.setItem(AUTH_KEY, "1"); } catch {}
-    return true;
+// ---------- Login admin lewat Supabase Auth ----------
+// Dosen cukup mengetik username; domain email ditambahkan otomatis. Mengetik email lengkap juga boleh.
+export async function cekLogin(user, pass) {
+  if (!supabase) return { ok: false, pesan: "Nilai dari .env.local tidak terbaca (URL atau key kosong)." };
+  const email = user.includes("@") ? user : `${user}@${DOMAIN}`;
+  try {
+    const { error } = await supabase.auth.signInWithPassword({ email, password: pass });
+    if (error) return { ok: false, pesan: `Supabase menjawab: "${error.message}" (status ${error.status ?? "-"}). Email yang dicoba: ${email}` };
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, pesan: "Tidak bisa menghubungi Supabase: " + (e?.message || e) };
   }
-  return false;
 }
-export function sudahLogin() {
-  try { return window.localStorage.getItem(AUTH_KEY) === "1"; } catch { return false; }
+export async function sudahLogin() {
+  if (!supabase) return false;
+  const { data } = await supabase.auth.getSession();
+  return !!data.session;
 }
-export function logout() {
-  try { window.localStorage.removeItem(AUTH_KEY); } catch {}
+export async function logout() {
+  if (supabase) await supabase.auth.signOut();
 }
 
 export function buatSlug(teks, sudahAda) {

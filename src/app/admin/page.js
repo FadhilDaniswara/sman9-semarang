@@ -8,7 +8,7 @@ export default function Dashboard() {
   const s = useStore("sekolah");
 
   const resetSemua = () => {
-    if (confirm("Kembalikan semua data (berita, ekskul, data sekolah) ke data awal?")) { b.reset(); e.reset(); s.reset(); }
+    if (confirm("Isi ulang database dengan data awal dari file? Semua perubahan di admin akan ditimpa.")) { b.reset(); e.reset(); s.reset(); }
   };
 
   const kartu = [
@@ -19,7 +19,7 @@ export default function Dashboard() {
   return (
     <div>
       <h1 className="font-display text-3xl text-forest">Dashboard</h1>
-      <p className="mt-1 text-sm">Data tersimpan di localStorage browser ini, jadi hanya terlihat di perangkat yang kamu pakai.</p>
+      <p className="mt-1 text-sm">Data tersimpan di database Supabase, jadi perubahan terlihat di semua perangkat.</p>
 
       <div className="mt-6 grid gap-4 sm:grid-cols-3">
         {kartu.map((k) => (
@@ -48,6 +48,7 @@ export default function Dashboard() {
       <button type="button" onClick={resetSemua} className="mt-8 rounded-md border-2 border-red-700 px-4 py-2 text-sm font-bold text-red-700 hover:bg-red-700 hover:text-white">
         Reset semua ke data awal
       </button>
+      <p className="mt-2 text-xs opacity-70">Tombol ini juga dipakai untuk mengisi database pertama kali dengan data awal.</p>
     </div>
   );
 }

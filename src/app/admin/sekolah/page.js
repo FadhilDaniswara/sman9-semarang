@@ -25,9 +25,9 @@ export default function AdminSekolah() {
   if (!f) return <p>Memuat…</p>;
   const ubah = (e) => setF({ ...f, [e.target.name]: e.target.value });
 
-  const submit = (e) => {
+  const submit = async (e) => {
     e.preventDefault();
-    simpan({
+    const ok = await simpan({
       ...data,
       tagline: f.tagline.trim(), profil: f.profil.trim(),
       visi: f.visi.trim() || null,
@@ -36,7 +36,7 @@ export default function AdminSekolah() {
       npsn: f.npsn.trim() || null, mapsUrl: f.mapsUrl.trim() || null,
       sambutan: { ...data.sambutan, judul: f.sambutanJudul.trim() || "Sambutan", teks: pecah(f.sambutanTeks), penulis: f.penulis.trim(), jabatan: f.jabatan.trim() },
     });
-    setPesan("Data sekolah tersimpan.");
+    if (ok) setPesan("Data sekolah tersimpan di database.");
   };
 
   return (

@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import Field from "@/components/admin/Field";
+import UnggahFoto from "@/components/admin/UnggahFoto";
 import { useStore, buatSlug } from "@/lib/store";
 
 const kosong = { id: "", category: "Kegiatan", title: "", date: "", excerpt: "", image: "", sumber: "", konten: "", baru: true };
@@ -13,7 +14,7 @@ export default function AdminBerita() {
   const ubah = (e) => setForm({ ...form, [e.target.name]: e.target.value });
   const edit = (b) => setForm({ ...b, image: b.image ?? "", sumber: b.sumber ?? "", konten: b.content.join("\n\n"), baru: false });
 
-  const submit = (e) => {
+  const submit = async (e) => {
     e.preventDefault();
     const item = {
       id: form.id,
@@ -26,18 +27,18 @@ export default function AdminBerita() {
       content: form.konten.split(/\n\s*\n/).map((s) => s.trim()).filter(Boolean),
     };
     if (item.content.length === 0) item.content = [item.excerpt];
+    let ok;
     if (form.baru) {
       item.id = buatSlug(item.title, data.map((b) => b.id));
-      simpan([item, ...data]);
+      ok = await simpan([item, ...data]);
     } else {
-      simpan(data.map((b) => (b.id === item.id ? item : b)));
+      ok = await simpan(data.map((b) => (b.id === item.id ? item : b)));
     }
-    setForm(null);
-    setPesan("Berita tersimpan.");
+    if (ok) { setForm(null); setPesan("Berita tersimpan di database."); }
   };
 
-  const hapus = (b) => {
-    if (confirm(`Hapus berita "${b.title}"?`)) { simpan(data.filter((x) => x.id !== b.id)); setPesan("Berita dihapus."); }
+  const hapus = async (b) => {
+    if (confirm(`Hapus berita "${b.title}"?`) && (await simpan(data.filter((x) => x.id !== b.id)))) setPesan("Berita dihapus.");
   };
 
   const geser = (i, arah) => {
@@ -59,7 +60,8 @@ export default function AdminBerita() {
           <Field label="Tanggal" id="date" value={form.date} onChange={ubah} placeholder="contoh: 10 Oktober 2026" />
           <Field label="Kategori" id="category" value={form.category} onChange={ubah} />
           <Field label="Ringkasan (tampil di kartu)" id="excerpt" textarea rows={3} value={form.excerpt} onChange={ubah} required />
-          <Field label="Path foto" id="image" value={form.image} onChange={ubah} placeholder="/images/news/berita-1.jpg" hint="Kosongkan bila tidak ada foto. File harus sudah ada di public/images/news/." />
+          <Field label="Path foto" id="image" value={form.image} onChange={ubah} placeholder="/images/news/berita-1.jpg" hint="Boleh diisi path foto yang sudah ada di public/images/news/, atau unggah foto baru di bawah. Kosongkan bila tidak ada foto." />
+          <UnggahFoto value={form.image} onUploaded={(url) => setForm((f) => ({ ...f, image: url }))} />
           <Field label="Isi berita" id="konten" textarea rows={10} value={form.konten} onChange={ubah} hint="Pisahkan paragraf dengan satu baris kosong." required />
           <Field label="Alamat sumber (opsional)" id="sumber" value={form.sumber} onChange={ubah} placeholder="https://..." />
         </div>
